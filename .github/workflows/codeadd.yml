@@ -15,7 +15,7 @@ jobs:
 
       - name: Add code to Python file
         run: |
-          sed -e '$r abc.txt' -i ./ab.txt
+          sed -e '$r database_template.txt' -i ./dev_us.yml
 
       - name: Commit changes
         run: |
