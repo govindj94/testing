@@ -1,0 +1,439 @@
+---
+
+- hosts: "localhost"
+  connection: "local"
+  gather_facts: false
+  vars:
+    stratosphere_stage: "{{ lookup('env', 'STRATOSPHERE_STAGE') | default('live') }}"
+    stratosphere_geography: "{{ lookup('env', 'STRATOSPHERE_GEOGRAPHY') | default('us') }}"
+    stratosphere_project_name: "{{ lookup('env', 'STRATOSPHERE_PROJECT_NAME') }}"
+    stratosphere_owner_group: "{{ lookup('env', 'STRATOSPHERE_OWNER_GROUP') }}"
+    stratosphere_contrib_group: "{{ lookup('env', 'STRATOSPHERE_CONTRIB_GROUP') }}"
+    stratosphere_service_account_name: "{{ lookup('env', 'SERVICE_ACCOUNT_NAME') }}"
+    stratosphere_service_account_client_id: "{{ lookup('env', 'SERVICE_ACCOUNT_CLIENT_ID') }}"
+    stratosphere_service_account_client_secret: "{{ lookup('env', 'SERVICE_ACCOUNT_CLIENT_SECRET') }}"
+    current_env: "{{ lookup('env', 'CURRENT_ENV') }}"
+  tasks:
+    - name: "Deploy Project"
+      register: "_stratosphere_project"
+      by.stratosphere.project:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        project_spec:
+          access_policies:
+            - name: "{{ stratosphere_owner_group }}"
+              type: "group"
+              roles:
+                - owner
+            - name: "{{ stratosphere_contrib_group }}"
+              type: "group"
+              roles:
+                - reader
+          service_accounts:
+            - name: "{{ stratosphere_service_account_name }}"
+          tags:
+            cost_center_id: "474000"
+            customer: "shared"
+            product_group: "shared"
+            environment_type: "dev"
+            budget_category: "gladiator"
+            team: "execution-wms-yms"
+        wait_time: 240 # 3 Minutes
+
+    - name: "Deploy Azure SPN"
+      # Store result as Ansible variable '_stratosphere_spn' for later usage
+      register: "_stratosphere_spn"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "spn-00"
+        type: "azure-service-principal"
+        spec: {}
+        wait_time: 600 # 10 minutes
+
+    - name: "Deploy SQL Server"
+      register: "_stratosphere_sql_server"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "sql-00"
+        type: "azure-sql-server"
+        spec:
+          key_vault:
+            access_policies:
+            - name: "{{ stratosphere_owner_group }}"
+              project: null
+              type: "group"
+            - name: "{{ stratosphere_contrib_group }}"
+              project: null
+              type: "group"
+            - name: "yms-api"
+              project: null
+              type: "resource"
+            - name: "bff-web"
+              project: null
+              type: "resource"
+            - name: "map-service"
+              project: null
+              type: "resource"
+            - name: "spn-00"
+              project: null
+              type: "resource"
+          server:
+            version: "12.0"
+            connection_type: "redirect"
+            ad_administrator:
+              login: "{{ stratosphere_owner_group }}"
+        wait_time: 1200 # 20 minutes
+
+    - name: "Deploy SQL Elastic Pool"
+      register: "_stratosphere_sql_elastic_pool"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "yms-elasticpool"
+        type: "azure-sql-elastic-pool"
+        spec:
+          server:
+            name: "{{ _stratosphere_sql_server['resource']['name'] }}"
+          elastic_pool:
+            sku:
+              name: "BasicPool"
+              tier: "Basic"
+              capacity: 50
+            max_size_bytes: 5242880000
+            zone_redundant: false
+            license_type: "BasePrice"
+            per_database_settings:
+              min_capacity: 0
+              max_capacity: 5
+    - name: "Deploy SQL Database"
+      register: "_stratosphere_sql_database"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "{{ _stratosphere_sql_server['resource']['name'] }}-{{ current_env }}"
+        type: "azure-sql-database"
+        spec:
+          database:
+            sku:
+              name: "Basic"
+            max_size_bytes: 1073741824
+            zone_redundant: false
+            license_type: "BasePrice"
+          server:
+            name: "{{ _stratosphere_sql_server['resource']['name'] }}"
+          elastic_pool:
+            name: "{{ _stratosphere_sql_elastic_pool['resource']['name'] }}"
+        wait_time: 1200 # 20 minutes
+
+    - name: "Deploy SQL Database"
+      register: "_stratosphere_sql_database"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "ecom_5c335b18-b076-4c1b-bbe1-3aefe66a01ba"
+        type: "azure-sql-database"
+        spec:
+          database:
+            sku:
+              name: "Basic"
+            max_size_bytes: 1073741824
+            zone_redundant: false
+            license_type: "BasePrice"
+          server:
+            name: "{{ _stratosphere_sql_server['resource']['name'] }}"
+          elastic_pool:
+            name: "{{ _stratosphere_sql_elastic_pool['resource']['name'] }}"
+        wait_time: 1200 # 20 minutes
+
+    - name: "Deploy SQL Database"
+      register: "_stratosphere_sql_database"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "ecom_56c92265-259e-46bf-b7c5-5dbbabdc28d8"  # psr
+        type: "azure-sql-database"
+        spec:
+          database:
+            sku:
+              name: "Basic"
+            max_size_bytes: 1073741824
+            zone_redundant: false
+            license_type: "BasePrice"
+          server:
+            name: "{{ _stratosphere_sql_server['resource']['name'] }}"
+          elastic_pool:
+            name: "{{ _stratosphere_sql_elastic_pool['resource']['name'] }}"
+        wait_time: 1200 # 20 minutes
+        
+    - name: "Deploy Azure Key Vault"
+      register: "_stratosphere_key_vault"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "kv-00"
+        type: "azure-key-vault"
+        spec:
+          key_vault:
+            access_policies:
+              - name: "{{ stratosphere_owner_group }}"
+                project: null
+                type: "group"
+              - name: "yms-api"
+                project: null
+                type: "resource"
+              - name: "bff-web"
+                project: null
+                type: "resource"
+              - name: "map-service"
+                project: null
+                type: "resource"
+              - name: "daas-etl"
+                project: null
+                type: "resource"
+              - name: "spn-00"
+                project: null
+                type: "resource"
+        wait_time: 600  # 10 minutes
+
+    - name: "Deploy Kibana Space"
+      register: "_stratosphere_kibana_space"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "yms-kibana-space"
+        type: "kibana-space"
+        spec:
+          kibana_space:
+            access_policies:
+              - name: "{{ stratosphere_owner_group }}"
+                project: null
+                type: "group"
+              - name: "{{ stratosphere_contrib_group }}"
+                project: null
+                type: "group"
+          key_vault:
+            access_policies:
+              - name: "{{ stratosphere_owner_group }}"
+                project: null
+                type: "group"
+              - name: "{{ stratosphere_contrib_group }}"
+                project: null
+                type: "group"
+
+    - name: "Web UI Storage Account"
+      register: "_stratosphere_storage_account"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "storage-web"
+        type: "azure-storage-account"
+        spec:
+          storage_account:
+            sku:
+              name: Standard_ZRS
+            credentials:
+              rotation_interval_days: 120
+          key_vault:
+            access_policies:
+              - name: "{{ stratosphere_owner_group }}"
+                project: null
+                type: "group"
+
+    - name: "Config UI Storage Account"
+      register: "_stratosphere_storage_account"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "config-storage-web"
+        type: "azure-storage-account"
+        spec:
+          storage_account:
+            sku:
+              name: Standard_ZRS
+            credentials:
+              rotation_interval_days: 120
+          key_vault:
+            access_policies:
+              - name: "{{ stratosphere_owner_group }}"
+                project: null
+                type: "group"
+
+    - name: "Event Hub Namespace"
+      register: "_stratosphere_event_hub_namespace"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "event-hub-namespace"
+        type: "azure-event-hub-namespace"
+        spec:
+          namespace:
+            access_policies:
+              - name: "{{ stratosphere_owner_group }}"
+                project: null
+                type: "group"
+            sku:
+              name: Standard
+              capacity: 1
+            is_auto_inflate_enabled: false
+            maximum_throughput_units: 0
+            kafka_enabled: true
+
+    - name: "Event Hub"
+      register: "_stratosphere_event_hub"
+      by.stratosphere.resource:
+        stage: "{{ stratosphere_stage }}"
+        geography: "{{ stratosphere_geography }}"
+        client_id: "{{ stratosphere_service_account_client_id }}"
+        client_secret: "{{ stratosphere_service_account_client_secret }}"
+        project: "{{ stratosphere_project_name }}"
+        name: "event-hub"
+        type: "azure-event-hub"
+        spec:
+          namespace:
+            name:  "{{ _stratosphere_event_hub_namespace['resource']['name'] }}"
+          event_hub:
+            partition_count: 1
+            message_retention_in_days: 7
+          key_vault:
+            access_policies:
+              - name: "{{ stratosphere_owner_group }}"
+                project: null
+                type: "group"
+              - name: "yms-api"
+                project: null
+                type: "resource"
+              - name: "bff-web"
+                project: null
+                type: "resource"
+              - name: "daas-etl"
+                project: null
+                type: "resource"
+
+    - name: "Write JDBC URL to Key Vault"
+      ignore_errors: "{{ ansible_check_mode }}"
+      # Using functionality from ansible-galaxy collection install azure.azcollection
+      azure.azcollection.azure_rm_keyvaultsecret:
+        tenant: "{{ _stratosphere_spn['resource']['status']['application_registration']['tenant_id'] }}"
+        client_id: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_id'] }}"
+        secret: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_secret'] }}"
+        subscription_id: "{{ _stratosphere_key_vault['resource']['status']['azure']['subscription_id'] }}"
+        keyvault_uri: "{{ _stratosphere_key_vault['resource']['links']['endpoint']['url'] }}"
+        secret_name: "{{ _stratosphere_sql_server['resource']['name'] }}-st-sqldb-jdbc"
+        secret_value: "jdbc:sqlserver://{{ _stratosphere_sql_server['resource']['links']['endpoint']['url'] }}:1433;hostNameInCertificate=*.database.windows.net;loginTimeout=30;"
+        state: "present"
+
+    - name: "Write map-service-db-host to Key Vault"
+      ignore_errors: "{{ ansible_check_mode }}"
+      # Using functionality from ansible-galaxy collection install azure.azcollection
+      azure.azcollection.azure_rm_keyvaultsecret:
+        tenant: "{{ _stratosphere_spn['resource']['status']['application_registration']['tenant_id'] }}"
+        client_id: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_id'] }}"
+        secret: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_secret'] }}"
+        subscription_id: "{{ _stratosphere_key_vault['resource']['status']['azure']['subscription_id'] }}"
+        keyvault_uri: "{{ _stratosphere_key_vault['resource']['links']['endpoint']['url'] }}"
+        secret_name: "map-service-db-host"
+        secret_value: "{{ _stratosphere_sql_server['resource']['links']['endpoint']['url'] }}"
+        state: "present"
+
+    - name: "Write map-service-db-port to Key Vault"
+      ignore_errors: "{{ ansible_check_mode }}"
+      # Using functionality from ansible-galaxy collection install azure.azcollection
+      azure.azcollection.azure_rm_keyvaultsecret:
+        tenant: "{{ _stratosphere_spn['resource']['status']['application_registration']['tenant_id'] }}"
+        client_id: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_id'] }}"
+        secret: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_secret'] }}"
+        subscription_id: "{{ _stratosphere_key_vault['resource']['status']['azure']['subscription_id'] }}"
+        keyvault_uri: "{{ _stratosphere_key_vault['resource']['links']['endpoint']['url'] }}"
+        secret_name: "map-service-db-port"
+        secret_value: 1433
+        state: "present"
+
+    - name: "Write key-vault-url to Key Vault"
+      ignore_errors: "{{ ansible_check_mode }}"
+      # Using functionality from ansible-galaxy collection install azure.azcollection
+      azure.azcollection.azure_rm_keyvaultsecret:
+        tenant: "{{ _stratosphere_spn['resource']['status']['application_registration']['tenant_id'] }}"
+        client_id: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_id'] }}"
+        secret: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_secret'] }}"
+        subscription_id: "{{ _stratosphere_key_vault['resource']['status']['azure']['subscription_id'] }}"
+        keyvault_uri: "{{ _stratosphere_key_vault['resource']['links']['endpoint']['url'] }}"
+        secret_name: "key-vault-url"
+        secret_value: "{{ _stratosphere_key_vault['resource']['links']['endpoint']['url'] }}"
+        state: "present"
+
+    - name: "Write daas-dev-datalake-storage-account-name to Key Vault"
+      ignore_errors: "{{ ansible_check_mode }}"
+      # Using functionality from ansible-galaxy collection install azure.azcollection
+      azure.azcollection.azure_rm_keyvaultsecret:
+        tenant: "{{ _stratosphere_spn['resource']['status']['application_registration']['tenant_id'] }}"
+        client_id: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_id'] }}"
+        secret: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_secret'] }}"
+        subscription_id: "{{ _stratosphere_key_vault['resource']['status']['azure']['subscription_id'] }}"
+        keyvault_uri: "{{ _stratosphere_key_vault['resource']['links']['endpoint']['url'] }}"
+        secret_name: "daas-dev-datalake-storage-account-name"
+        secret_value: "dummy-datalake-storage-account-name"
+        state: "present"
+
+    - name: "Write daas-dev-datalake-storage-access-key to Key Vault"
+      ignore_errors: "{{ ansible_check_mode }}"
+      # Using functionality from ansible-galaxy collection install azure.azcollection
+      azure.azcollection.azure_rm_keyvaultsecret:
+        tenant: "{{ _stratosphere_spn['resource']['status']['application_registration']['tenant_id'] }}"
+        client_id: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_id'] }}"
+        secret: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_secret'] }}"
+        subscription_id: "{{ _stratosphere_key_vault['resource']['status']['azure']['subscription_id'] }}"
+        keyvault_uri: "{{ _stratosphere_key_vault['resource']['links']['endpoint']['url'] }}"
+        secret_name: "daas-dev-datalake-storage-access-key"
+        secret_value: "dummy-datalake-storage-access-key"
+        state: "present"
+
+    - name: "Write daas-dev-storage-container-name to Key Vault"
+      ignore_errors: "{{ ansible_check_mode }}"
+      # Using functionality from ansible-galaxy collection install azure.azcollection
+      azure.azcollection.azure_rm_keyvaultsecret:
+        tenant: "{{ _stratosphere_spn['resource']['status']['application_registration']['tenant_id'] }}"
+        client_id: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_id'] }}"
+        secret: "{{ _stratosphere_spn['resource']['status']['application_registration']['client_secret'] }}"
+        subscription_id: "{{ _stratosphere_key_vault['resource']['status']['azure']['subscription_id'] }}"
+        keyvault_uri: "{{ _stratosphere_key_vault['resource']['links']['endpoint']['url'] }}"
+        secret_name: "daas-dev-storage-container-name"
+        secret_value: "dummy-storage-container-name"
+        state: "present"
