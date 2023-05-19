@@ -22,6 +22,7 @@ jobs:
           git config --global user.email "govindj94@gmail.com"
           git config --global user.name "govindj94"
           git commit -am "Append text"
+          git add -A
           git push
 
     
