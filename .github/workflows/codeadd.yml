@@ -18,10 +18,11 @@ jobs:
           sed -e '$r database_template.txt' -i ./dev_us.yml
 
       - name: Commit changes
-        run: |
-          git config --global user.email "govindj94@gmail.com"
-          git config --global user.name "govindj94"
-          git commit -am "Append text"
-          git push
+        uses: EndBug/add-and-commit@v9.1.1
+        with:
+          github-token: ${{ secrets.PAT }}
+          author_name: govindj94
+          author_email: govindj94@gmail.com
+          message: Append Test
 
     
