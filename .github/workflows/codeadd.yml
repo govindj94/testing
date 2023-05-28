@@ -1,4 +1,4 @@
-name: Add Code to Python File
+name: Add Database template to env.yml file
 
 on:
   workflow_dispatch:
