@@ -52,6 +52,8 @@ jobs:
       - name: Create PR for updated API
         # Create a deployments PR for the updated specification. This is only done if a PR doesn't already exist for the branch.
         #if: steps.check-for-diff.outputs.changed == 'true' && steps.checkout-existing-pr.outcome == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           gh pr create \
             --title "[YMS] ${{ env.PR_TITLE }} ${{ env.CURRENT_ENV }}" \
