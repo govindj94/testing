@@ -55,8 +55,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
-          gh pr create \
-            --title "[YMS] ${{ env.PR_TITLE }} ${{ env.CURRENT_ENV }}" \
-            --base main \
-            --fill      
+          gh pr create --title "Update" --body "This is to update database template in env.yml file" --base main --fill      
 
