@@ -60,11 +60,11 @@ jobs:
         working-directory: ./${{ env.CURRENT_ENV }}/stratosphere/
         run: |
           # Find pattern in the file and store the line number
-          line_number=$(grep -n "max_capacity: 5" ${{ env.CURRENT_ENV }}.yml | cut -d ":" -f 1)
+          line_number=$(grep -n "'Deploy SQL Database'" ${{ env.CURRENT_ENV }}.yml | cut -d ":" -f 1)
           
           # Print the line number
 
-          line_number=$((line_number + 2))
+          line_number=$((line_number - 2))
           echo "Pattern found at line number: $line_number"
           
           # Append Ansible task after the pattern in the YAML file
