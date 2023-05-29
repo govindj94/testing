@@ -7,7 +7,7 @@ on:
     branches:
       - main
     paths:
-      - 'dev-us/stratosphere/**'  
+      - 'dev_us/stratosphere/**'  
       - '.github/workflows/dev_stratosphere.yml'
 
 jobs:
