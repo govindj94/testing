@@ -60,6 +60,7 @@ jobs:
         run: |
           # Find pattern in the file and store the line number
           line_number=$(grep -n "^max_capacity: 5" ${{ env.CURRENT_ENV }}.yml | cut -d ":" -f 1)
+          echo $line_number
           
           # Append Ansible task after the pattern in the YAML file
           sed -i "${line_number}a \n- name: "Deploy SQL Database"\n      register: "_stratosphere_sql_database"\n      by.stratosphere.resource:\n        stage: "{{ stratosphere_stage }}"\n        geography: "{{ stratosphere_geography }}"\n        client_id: "{{ stratosphere_service_account_client_id }}"\n        client_secret: "{{ stratosphere_service_account_client_secret }}"\n        project: "{{ stratosphere_project_name }}"\n        name: "{{ _stratosphere_sql_server['resource']['name'] }}-{{ current_env }}"\n        type: "azure-sql-database"\n        spec:\n          database:\n            sku:\n              name: "Basic"\n            max_size_bytes: 1073741824\n            zone_redundant: false\n            license_type: "BasePrice"\n          server:\n            name: "{{ _stratosphere_sql_server['resource']['name'] }}"\n          elastic_pool:\n            name: "{{ _stratosphere_sql_elastic_pool['resource']['name'] }}"\n        wait_time: 1200 # 20 minutes/" ${{ env.CURRENT_ENV }}.yml
