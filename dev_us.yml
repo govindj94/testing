@@ -119,6 +119,7 @@
             per_database_settings:
               min_capacity: 0
               max_capacity: 5
+              
     - name: "Deploy SQL Database"
       register: "_stratosphere_sql_database"
       by.stratosphere.resource:
