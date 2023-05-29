@@ -59,7 +59,7 @@ jobs:
         if: steps.check_dev_us_yml.outputs.files_exists == 'true'
         run: |
           # Find pattern in the file and store the line number
-          line_number=$(grep -n "^max_capacity: 5" dev_us.yml | cut -d ":" -f 1)
+          line_number=$(grep -n "max_capacity: 5" dev_us.yml | cut -d ":" -f 1)
           
           # Print the line number
           echo "Pattern found at line number: $line_number"
