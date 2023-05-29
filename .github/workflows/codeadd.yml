@@ -108,4 +108,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           gh pr create --title "Update" --body "This is to update database template in env.yml file" --base main --fill      
+          
+      - name: Successful Run
+        if: success()
+        run: |
+          # setup successful output information
+          echo "ALERT_CATEGORY=INFORMATION" >> "$GITHUB_ENV"
+          echo "ALERT_MESSAGE='Realm UI Tests passed.'" >> "$GITHUB_ENV"
+          
+      - name: Failed Run
+        if: failure()
+        run: |
+          # setup failure output information
+          echo "ALERT_CATEGORY=ERROR" >> "$GITHUB_ENV"
+          echo "ALERT_MESSAGE='Realm UI Tests failed.'" >> "$GITHUB_ENV"       
 
+  finalize:
+    name: Finalize run
+    runs-on: ubuntu-latest
+    needs: [Add-code]
+    steps:
+      - run: echo Done updating yml file with databse template addition
