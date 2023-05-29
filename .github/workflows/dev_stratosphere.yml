@@ -1,1 +1,29 @@
+name: YMS Dev US Stratosphere
 
+on:
+
+
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: "Deploy"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # https://github.com/actions/checkout
+      - name: "SETUP - Checkout requisite actions"
+        #////////////////////#
+        # What does this do?
+        #     Checkout the repository will all of it's history
+        uses: "actions/checkout@v3"
+        with:
+          fetch-depth: 0
+      - name: Get Branch Name
+        id: branch_name
+        run: echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+      
+      - name: Print Branch Name
+        run: echo "Current branch is ${{ env.BRANCH_NAME }}"      
