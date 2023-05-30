@@ -67,10 +67,9 @@ jobs:
       - name: Check if given realmID is already present
         id: check
         run: |
-          if grep -q "ecom_${{ env.REALMID }}" playbook.yml; then
-            echo "given realmID is already present."
-			  echo "Error: Ansible module is already present in playbook.yml"
-			  exit 1
+          if grep -q "ecom_${{ env.REALMID }}" ${{ env.CURRENT_ENV }}.yml; then
+            echo "Error: ecom_${{ env.REALMID }} is already present in ${{ env.CURRENT_ENV }}.yml"
+            exit 1
           fi
         
       - name: Find Pattern and Append Task
