@@ -112,7 +112,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
-          gh pr create --title "Create ${env.CURRENT_ENV} database ecom_${env.REALM_ID}" --body "This is to update database template in env.yml file" --base main --fill      
+          gh pr create --title "Create ${{ env.CURRENT_ENV }} database ecom_${{ env.REALM_ID }}" --body "This is to update database template in env.yml file" --base main --fill      
           
       - name: Successful Run
         if: success()
