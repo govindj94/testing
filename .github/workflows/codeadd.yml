@@ -69,18 +69,12 @@ jobs:
         run: |
           if grep -q "ecom_${{ env.REALMID }}" playbook.yml; then
             echo "given realmID is already present."
-            echo "::set-output name=realmID_found::true"
-          else
-            echo "given realmID isnot already present."
-            echo "::set-output name=realmID_found::false"
+			  echo "Error: Ansible module is already present in playbook.yml"
+			  exit 1
           fi
-
-      - name: Skip Workflow
-        if: steps.check.outputs.realmID_found == 'true'
-        run: echo "Workflow skipped."
         
       - name: Find Pattern and Append Task
-        if: steps.check.outputs.realmID_found != 'true'
+        if: steps.check_env_yml.outputs.files_exists == 'true'
         working-directory: ./${{ env.CURRENT_ENV }}/stratosphere/
         run: |
           # Find pattern in the file and store the line number
@@ -93,7 +87,7 @@ jobs:
           
       - name: Check for diff
         # If git detects changes, steps.check-for-diff.outputs.diff-status be set to true, else it will be false
-        if: steps.check.outputs.realmID_found != 'true'
+        
         shell: bash
         id: check-for-diff
         run: |
@@ -111,7 +105,7 @@ jobs:
       
       - name: Commit changes
         # If changes are present, commit them. This step will commit modifications and add new files, too.
-        if: steps.check.outputs.realmID_found != 'true'
+        if: steps.check-for-diff.outputs.changed == 'true'
         uses: EndBug/add-and-commit@v9
         with:
           default_author: github_actions
@@ -125,7 +119,7 @@ jobs:
       - name: Create PR for updated API
         # Create a deployments PR for the updated specification. This is only done if a PR doesn't already exist for the branch.
         #if: steps.check-for-diff.outputs.changed == 'true' && steps.checkout-existing-pr.outcome == 'failure'
-        if: steps.check.outputs.realmID_found != 'true'
+        
 
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
@@ -133,7 +127,7 @@ jobs:
           gh pr create --title "Create ${{ env.CURRENT_ENV }} database ecom_${{ env.REALMID }}" --body "This is to update database template in env.yml file" --base main --fill      
           
       - name: Successful Run
-        if: steps.check.outputs.realmID_found != 'true'
+        
         run: |
           # setup successful output information
           echo "ALERT_CATEGORY=INFORMATION" >> "$GITHUB_ENV"
