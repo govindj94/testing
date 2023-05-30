@@ -66,6 +66,7 @@ jobs:
 
       - name: Check if given realmID is already present
         id: check
+        working-directory: ./${{ env.CURRENT_ENV }}/stratosphere/
         run: |
           if grep -q "ecom_${{ env.REALMID }}" ${{ env.CURRENT_ENV }}.yml; then
             echo "Error: ecom_${{ env.REALMID }} is already present in ${{ env.CURRENT_ENV }}.yml"
