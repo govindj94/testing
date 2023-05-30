@@ -30,7 +30,6 @@ env:
 jobs:
   Add-code:
     runs-on: ubuntu-latest
-    if: '! grep -q "ecom_${{ env.REALMID }}" ./${{ env.CURRENT_ENV }}/stratosphere/${{ env.CURRENT_ENV }}.yml'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -64,9 +63,24 @@ jobs:
  #           echo "Given realmID is already present. Skipping task append."
   #          exit 0
   #        fi
-          
+
+      - name: Check if given realmID is already present
+        id: check
+        run: |
+          if grep -q "ecom_${{ env.REALMID }}" playbook.yml; then
+            echo "given realmID is already present."
+            echo "::set-output name=realmID_found::true"
+          else
+            echo "given realmID isnot already present."
+            echo "::set-output name=realmID_found::false"
+          fi
+
+      - name: Skip Workflow
+        if: steps.check.outputs.realmID_found == 'true'
+        run: echo "Workflow skipped."
+        
       - name: Find Pattern and Append Task
-        if: steps.check_env_yml.outputs.files_exists == 'true'
+        if: steps.check.outputs.realmID_found != 'true'
         working-directory: ./${{ env.CURRENT_ENV }}/stratosphere/
         run: |
           # Find pattern in the file and store the line number
@@ -79,6 +93,7 @@ jobs:
           
       - name: Check for diff
         # If git detects changes, steps.check-for-diff.outputs.diff-status be set to true, else it will be false
+        if: steps.check.outputs.realmID_found != 'true'
         shell: bash
         id: check-for-diff
         run: |
@@ -96,7 +111,7 @@ jobs:
       
       - name: Commit changes
         # If changes are present, commit them. This step will commit modifications and add new files, too.
-        if: steps.check-for-diff.outputs.changed == 'true'
+        if: steps.check.outputs.realmID_found != 'true'
         uses: EndBug/add-and-commit@v9
         with:
           default_author: github_actions
@@ -110,14 +125,15 @@ jobs:
       - name: Create PR for updated API
         # Create a deployments PR for the updated specification. This is only done if a PR doesn't already exist for the branch.
         #if: steps.check-for-diff.outputs.changed == 'true' && steps.checkout-existing-pr.outcome == 'failure'
-        if: steps.check-for-diff.outputs.changed == 'true'
+        if: steps.check.outputs.realmID_found != 'true'
+
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
           gh pr create --title "Create ${{ env.CURRENT_ENV }} database ecom_${{ env.REALMID }}" --body "This is to update database template in env.yml file" --base main --fill      
           
       - name: Successful Run
-        if: success()
+        if: steps.check.outputs.realmID_found != 'true'
         run: |
           # setup successful output information
           echo "ALERT_CATEGORY=INFORMATION" >> "$GITHUB_ENV"
@@ -128,11 +144,4 @@ jobs:
         run: |
           # setup failure output information
           echo "ALERT_CATEGORY=ERROR" >> "$GITHUB_ENV"
-          echo "ALERT_MESSAGE='Realm UI Tests failed.'" >> "$GITHUB_ENV"       
-
-  finalize:
-    name: Finalize run
-    runs-on: ubuntu-latest
-    needs: [Add-code]
-    steps:
-      - run: echo Done updating yml file with databse template addition
+          echo "ALERT_MESSAGE='Realm UI Tests failed.'" >> "$GITHUB_ENV"
