@@ -28,7 +28,7 @@ env:
 jobs:
   Add-code:
     runs-on: ubuntu-latest
-    if: "! grep -q 'ecom_${{ env.REALMID }}' ${{ env.CURRENT_ENV }}.yml"
+    if: "! grep -q 'ecom_${{ env.REALMID }}' ./${{ env.CURRENT_ENV }}/stratosphere/${{ env.CURRENT_ENV }}.yml"
 
     steps:
       - name: Checkout repository
