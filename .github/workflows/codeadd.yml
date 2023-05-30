@@ -101,13 +101,14 @@ jobs:
           add: '*.yml'
       
       - name: Set Default PR Title
-        if: env.PR_TITLE == null
+        if: steps.check-for-diff.outputs.changed == 'true'
         run: |
           echo "PR_TITLE=Update" >> "$GITHUB_ENV"
           
       - name: Create PR for updated API
         # Create a deployments PR for the updated specification. This is only done if a PR doesn't already exist for the branch.
         #if: steps.check-for-diff.outputs.changed == 'true' && steps.checkout-existing-pr.outcome == 'failure'
+        if: steps.check-for-diff.outputs.changed == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
