@@ -45,6 +45,15 @@ jobs:
       - name: Print Branch Name
         run: echo "Current branch is ${{ env.BRANCH_NAME }}"  
         
+      - name: Check if given realmID is already present
+        id: check
+        working-directory: ./${{ env.CURRENT_ENV }}/stratosphere/
+        run: |
+          if grep -q "ecom_${{ env.REALMID }}" ${{ env.CURRENT_ENV }}.yml; then
+            echo "Error: ecom_${{ env.REALMID }} is already present in ${{ env.CURRENT_ENV }}.yml"
+            exit 1
+          fi 
+        
       - name: Check env.yml exists
         # https://github.com/andstor/file-existence-action
         continue-on-error: false
@@ -67,15 +76,6 @@ jobs:
  #           echo "Given realmID is already present. Skipping task append."
   #          exit 0
   #        fi
-
-      - name: Check if given realmID is already present
-        id: check
-        working-directory: ./${{ env.CURRENT_ENV }}/stratosphere/
-        run: |
-          if grep -q "ecom_${{ env.REALMID }}" ${{ env.CURRENT_ENV }}.yml; then
-            echo "Error: ecom_${{ env.REALMID }} is already present in ${{ env.CURRENT_ENV }}.yml"
-            exit 1
-          fi
         
       - name: Find Pattern and Append Task
         if: steps.check_env_yml.outputs.files_exists == 'true'
