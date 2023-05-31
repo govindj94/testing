@@ -127,9 +127,10 @@ jobs:
       - name: Create PR for updated API
         # Create a deployments PR for the updated specification. This is only done if a PR doesn't already exist for the branch.
         #if: steps.check-for-diff.outputs.changed == 'true' && steps.checkout-existing-pr.outcome == 'failure'
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT }}
+       #env:
+         # GITHUB_TOKEN: ${{ secrets.PAT }}
         run: |
+          echo ${{ secrets.PAT }} | gh auth login --with-token
           gh pr create --title "Create ${{ env.CURRENT_ENV }} database ecom_${{ env.REALMID }}" --body "This is to update database template in env.yml file" --base main --fill      
        
       - name: successful Run
