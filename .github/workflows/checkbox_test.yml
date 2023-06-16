@@ -1,0 +1,24 @@
+name: Dispatch Workflow Example
+
+on:
+  workflow_dispatch:
+    inputs:
+      enableFeature:
+        description: 'Enable Feature'
+        required: true
+        default: 'false'
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run your job
+        run: |
+          echo "Enable Feature: ${{ github.event.inputs.enableFeature }}"
