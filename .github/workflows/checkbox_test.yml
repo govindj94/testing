@@ -3,11 +3,11 @@ name: Dispatch Workflow Example
 on:
   workflow_dispatch:
     inputs:
-      features:
-        description: 'Select Features'
-        required: true
-        default: 'Feature 1,Feature 2'
-
+      options:
+        description: 'Options'
+        required: false
+        default: ''
+        
 jobs:
   build:
     runs-on: ubuntu-latest
