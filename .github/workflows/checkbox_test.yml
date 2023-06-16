@@ -3,13 +3,39 @@ name: Dispatch Workflow Example
 on:
   workflow_dispatch:
     inputs:
-      enableFeature:
-        description: 'Enable Feature'
+      key1:
+        description: 'Key 1'
         required: true
-        default: 'false'
+        default: ''
+      value1:
+        description: 'Value 1'
+        required: true
+        default: ''
+      key2:
+        description: 'Key 2'
+        required: true
+        default: ''
+      value2:
+        description: 'Value 2'
+        required: true
+        default: ''
+      key3:
+        description: 'Key 3'
+        required: true
+        default: ''
+      value3:
+        description: 'Value 3'
+        required: true
+        default: ''
+      options:
+        description: 'Options'
+        required: false
+        default: ''
+        type: checkbox
         options:
-          - 'true'
-          - 'false'
+          option1: 'Option 1'
+          option2: 'Option 2'
+          option3: 'Option 3'
 
 jobs:
   build:
