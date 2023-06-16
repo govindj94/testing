@@ -6,11 +6,7 @@ on:
       features:
         description: 'Select Features'
         required: true
-        default: '[]'
-        options:
-          - 'Feature 1'
-          - 'Feature 2'
-          - 'Feature 3'
+        default: 'Feature 1,Feature 2'
 
 jobs:
   build:
