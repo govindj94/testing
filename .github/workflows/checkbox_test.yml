@@ -3,25 +3,14 @@ name: Dispatch Workflow Example
 on:
   workflow_dispatch:
     inputs:
-      role-id:
-        description: 'Specify id for role'
+      selected_option:
+        description: 'Select an option'
         required: true
-      policy :
-        type: choice
-        description: Select the policy name to add to role
-        required: true
+        default: 'Option A'
         options:
-        - 1002000166-user.read
-        - 1002079143-by.yms.traileractivity.manage
-        - 1002079144-by.yms.traileractivity.operate
-        - 1002079145-by.yms.traileractivity.view
-        - 1002079140-by.yms.carrierframework.manage
-        - 1002079141-by.yms.carrierframework.operate
-        - 1002079142-by.yms.carrierframework.view
-        - 1002106605-plat.lui.portal.settings.categories.yms-settings-operations-category.write
-        - 1002106606-plat.lui.portal.settings.categories.yms-settings-operations-category.read
-        - 1002106607-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.write
-        - 1002106608-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.read
+          - 'Option A'
+          - 'Option B'
+          - 'Option C'
 jobs:
   rest-action:
     runs-on: ubuntu-latest
