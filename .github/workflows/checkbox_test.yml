@@ -12,6 +12,7 @@ on:
         required: true
         default: ''
         options:
+        - 
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
