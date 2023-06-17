@@ -12,7 +12,7 @@ on:
         required: true
         default: ''
         options:
-        - 
+        - No Policy
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
@@ -29,6 +29,7 @@ on:
         description: Select the 2nd policy name to assign to role
         required: true
         options:
+        - No Policy
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
@@ -45,6 +46,7 @@ on:
         description: Select the 3rd policy name to assign to role
         required: true
         options:
+        - No Policy
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
@@ -61,6 +63,7 @@ on:
         description: Select the 4th policy name to assign to role
         required: true
         options:
+        - No Policy
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
@@ -77,6 +80,7 @@ on:
         description: Select the 5th policy name to assign to role
         required: true
         options:
+        - No Policy
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
@@ -93,6 +97,7 @@ on:
         description: Select the 6th policy name to assign to role
         required: true
         options:
+        - No Policy
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
@@ -109,6 +114,7 @@ on:
         description: Select the 7th policy name to assign to role
         required: true
         options:
+        - No Policy
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
@@ -125,6 +131,7 @@ on:
         description: Select the 8th policy name to assign to role
         required: true
         options:
+        - No Policy
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
         - 1002079144-by.yms.traileractivity.operate
