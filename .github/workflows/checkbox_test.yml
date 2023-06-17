@@ -7,7 +7,7 @@ on:
         description: 'Specify role id'
         required: true
       policy :
-        type: choice
+        type: multi-choice
         description: Select the policy name to assign to role
         required: true
         options:
