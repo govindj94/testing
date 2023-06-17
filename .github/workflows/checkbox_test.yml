@@ -8,8 +8,9 @@ on:
         required: true
       policy1 :
         type: choice
-        description: Select the policy name to assign to role
+        description: Select the 1st policy name to assign to role
         required: true
+        default: ''
         options:
         - 1002000166-user.read
         - 1002079143-by.yms.traileractivity.manage
@@ -24,7 +25,7 @@ on:
         - 1002106608-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.read
       policy2 :
         type: choice
-        description: Select the policy name to assign to role
+        description: Select the 2nd policy name to assign to role
         required: true
         options:
         - 1002000166-user.read
@@ -40,7 +41,7 @@ on:
         - 1002106608-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.read  
       policy3 :
         type: choice
-        description: Select the policy name to assign to role
+        description: Select the 3rd policy name to assign to role
         required: true
         options:
         - 1002000166-user.read
@@ -56,7 +57,7 @@ on:
         - 1002106608-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.read  
       policy4 :
         type: choice
-        description: Select the policy name to assign to role
+        description: Select the 4th policy name to assign to role
         required: true
         options:
         - 1002000166-user.read
@@ -72,7 +73,7 @@ on:
         - 1002106608-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.read  
       policy5 :
         type: choice
-        description: Select the policy name to assign to role
+        description: Select the 5th policy name to assign to role
         required: true
         options:
         - 1002000166-user.read
@@ -88,7 +89,7 @@ on:
         - 1002106608-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.read  
       policy6 :
         type: choice
-        description: Select the policy name to assign to role
+        description: Select the 6th policy name to assign to role
         required: true
         options:
         - 1002000166-user.read
@@ -104,7 +105,7 @@ on:
         - 1002106608-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.read  
       policy7 :
         type: choice
-        description: Select the policy name to assign to role
+        description: Select the 7th policy name to assign to role
         required: true
         options:
         - 1002000166-user.read
@@ -120,7 +121,7 @@ on:
         - 1002106608-plat.lui.portal.settings.categories.yms-settings-operations-category.groups.yms-settings-operations-yard-group.read  
       policy8 :
         type: choice
-        description: Select the policy name to assign to role
+        description: Select the 8th policy name to assign to role
         required: true
         options:
         - 1002000166-user.read
