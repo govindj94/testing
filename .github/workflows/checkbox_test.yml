@@ -3,21 +3,18 @@ name: Dispatch Workflow Example
 on:
   workflow_dispatch:
     inputs:
-      admin_line:
-        description: 'Select the Roles for which you want to assign the policies'
-      Admin-Role:
-        type: boolean
-        description: Admin Role
-      Yard-operator:
-        type: boolean
-        description: Yard operator
-      Carrier-Admin:
-        type: boolean
-        description: Carrier Admin
-      Carrier-Operatore:
-        type: boolean
-        description: Carrier Operatore
-        
+      role-name :
+        type: choice
+        description: Select the role to create and policy assignment
+        required: true
+        default: ''
+        options:
+        - test-role1
+        - Admin
+        - Yard Operator
+        - Carrier Admin
+        - Carrier Operator
+      
 jobs:
   rest-action:
     runs-on: ubuntu-latest
