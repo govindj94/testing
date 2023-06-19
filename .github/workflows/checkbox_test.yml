@@ -164,11 +164,10 @@ jobs:
         id: get-name
         run: |
           policies=()
-          for i in {1..8}; do
           policy_name="policy$i"
-          policy_value="${{ inputs.${policy_name} }}"
+          policy_value="${{ inputs[policy_name] }}"
           if [[ "$policy_value" != "No Policy" ]]; then
-            policy_n="${{ inputs.policy$i }}"
+            policy_n="${{ inputs['policy' + i] }}"
             id="${policy_n%%-*}"
             echo "ID=$id" >> "$GITHUB_OUTPUT"
             policies+=(ID)
