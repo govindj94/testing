@@ -165,7 +165,9 @@ jobs:
         run: |
           policies=()
           for i in {1..8}; do
-          if [[ "${{ inputs.policy$i }}" != "No Policy" ]]; then
+          policy_name="policy$i"
+          policy_value="${{ inputs.${policy_name} }}"
+          if [[ "$policy_value" != "No Policy" ]]; then
             policy_n="${{ inputs.policy$i }}"
             id="${policy_n%%-*}"
             echo "ID=$id" >> "$GITHUB_OUTPUT"
