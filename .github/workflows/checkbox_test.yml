@@ -161,8 +161,22 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Getting Policy Name 
+        id: get-name
         run: |
-          IFS='-' read -ra ADDR <<< "${{ github.event.inputs.policy }}"
-          t1="${ADDR[0]}"
-          PolicyName="${t1}"
-          echo "policy=${PolicyName}" >> $GITHUB_ENV
+          policies=()
+          for i in {1..8}; do
+          if [[ "${{ inputs.policy$i }}" != "No Policy" ]]; then
+            policy_n="${{ inputs.policy$i }}"
+            id="${policy_n%%-*}"
+            echo "ID=$id" >> "$GITHUB_OUTPUT"
+            policies+=(ID)
+          fi
+
+          echo "::set-output name=policies::${policies[*]}"
+       
+      - name: Make API POST request to assign permission to role
+        run: |
+          permissions=("${{ steps.get-name.outputs.policies }}")
+          payload="{ \"permissionId\": ${permissions[@]} }"
+          echo "Payload: $payload"
+
